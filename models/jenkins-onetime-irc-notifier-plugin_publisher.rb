@@ -1,12 +1,14 @@
 
 class Jenkins-onetime-irc-notifier-pluginPublisher < Jenkins::Tasks::Publisher
 
+    attr_reader :server, :port, :user, :channel, :message
+
     display_name "Jenkins-onetime-irc-notifier-plugin publisher"
 
     # Invoked with the form parameters when this extension point
     # is created from a configuration screen.
     def initialize(attrs = {})
-
+      attrs.each { |k, v| instance_variable_set "@#{k}", v }
     end
 
     ##

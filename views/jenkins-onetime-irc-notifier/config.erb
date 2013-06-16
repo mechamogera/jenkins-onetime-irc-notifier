@@ -4,7 +4,35 @@
 %>
 
 <table style="margin-left: 30px;"><%
+  f.entry :title => 'Server',
+          :field => :server,
+          :description => 'IRC Server' do
+    f.textbox :clazz => 'required', :default => 'localhost'
+  end
 
+  f.entry :title => 'Port',
+          :field => :port,
+          :description => 'IRC Port' do
+    f.textbox :clazz => 'required', :default => '6667'
+  end
+
+  f.entry :title => 'User',
+          :field => :user,
+          :description => 'IRC User' do
+    f.textbox :clazz => 'required', :default => 'hoge'
+  end
+
+  f.entry :title => 'Channel',
+          :field => :channel,
+          :description => 'IRC Channel' do
+    f.textbox :clazz => 'required', :default => '#hoge'
+  end
+
+  f.entry :title => 'Message',
+          :field => :message,
+          :description => 'IRC Message' do
+    f.textarea :clazz => 'required', :default => 'hoge'
+  end
 %></table>
 
 <%
