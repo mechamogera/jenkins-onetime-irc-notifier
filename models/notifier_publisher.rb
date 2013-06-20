@@ -1,9 +1,10 @@
+require_relative 'onetime-irc-notifier'
 
-class Jenkins-onetime-irc-notifier-pluginPublisher < Jenkins::Tasks::Publisher
+class NotifierPublisher < Jenkins::Tasks::Publisher
 
     attr_reader :server, :port, :user, :channel, :message
 
-    display_name "Jenkins-onetime-irc-notifier-plugin publisher"
+    display_name "IRC Onetime Notifier"
 
     # Invoked with the form parameters when this extension point
     # is created from a configuration screen.
@@ -28,6 +29,8 @@ class Jenkins-onetime-irc-notifier-pluginPublisher < Jenkins::Tasks::Publisher
     # @param [Jenkins::Model::Listener] listener the listener for this build.
     def perform(build, launcher, listener)
       # actually perform the build step
+      irc = OnetimeIRCNotifier.new(@server, @port.to_i)
+      irc.send_with_changename(@user, @channel, @message.split("\n"))
     end
 
 end
