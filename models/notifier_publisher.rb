@@ -29,8 +29,9 @@ class NotifierPublisher < Jenkins::Tasks::Publisher
     # @param [Jenkins::Model::Listener] listener the listener for this build.
     def perform(build, launcher, listener)
       # actually perform the build step
+      env = build.native.getEnvironment()
       irc = OnetimeIRCNotifier.new(@server, @port.to_i)
-      irc.send_with_changename(@user, @channel, @message.split("\n"))
+      irc.send_with_changename(@user, @channel, @message)
     end
 
 end
