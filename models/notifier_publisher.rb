@@ -1,4 +1,5 @@
 require_relative 'onetime-irc-notifier'
+require_relative 'env-changer'
 
 class NotifierPublisher < Jenkins::Tasks::Publisher
 
@@ -29,9 +30,8 @@ class NotifierPublisher < Jenkins::Tasks::Publisher
     # @param [Jenkins::Model::Listener] listener the listener for this build.
     def perform(build, launcher, listener)
       # actually perform the build step
-      env = build.native.getEnvironment()
-      irc = OnetimeIRCNotifier.new(@server, @port.to_i)
-      irc.send_with_changename(@user, @channel, @message)
+      env = EnvChanger.new(build.native.getEnvironment())
+      irc = OnetimeIRCNotifier.new(env.change(@server), env.change(@port).to_i)
+      irc.send_with_changename(env.change(@user), env.change(@channel), env.change(@message))
     end
-
 end
