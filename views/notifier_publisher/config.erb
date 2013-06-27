@@ -3,7 +3,8 @@
   f.block do
 %>
 
-<table style="margin-left: 30px;"><%
+<table style="margin-left: 30px;">
+<%
   f.entry :title => 'Server',
           :field => :server,
           :description => 'IRC Server' do
@@ -28,10 +29,41 @@
     f.textbox :clazz => 'required'
   end
 
-  f.entry :title => 'Message',
-          :field => :message,
-          :description => 'IRC Message' do
-    f.textarea :clazz => 'required'
+  f.entry :title => "Messages",
+          :fiels => :messages do
+    f.repeatable :field => "messages",
+      :minimum => 1 do
+%>
+  <table width="100%">
+<%
+      f.entry :title => "JobState",
+              :field => :job_state do
+%>
+    <select name="jobState">
+<%
+#       f.option :selected => "selected", :value => "Success"
+#       f.option :value => "Failure"
+%>
+    </select>
+<%
+      end
+%>
+    </select>
+<%
+
+      f.entry :title => 'Message',
+              :field => :message,
+              :description => 'IRC Message' do
+        f.textarea :clazz => 'required'
+      end
+
+      f.entry do
+        f.repeatableDeleteButton
+      end
+%>
+  </table>
+<%
+    end
   end
 %></table>
 
