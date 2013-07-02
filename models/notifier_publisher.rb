@@ -3,7 +3,7 @@ require_relative 'env-changer'
 
 class NotifierPublisher < Jenkins::Tasks::Publisher
 
-    attr_reader :server, :port, :user, :channel, :message
+    attr_reader :server, :port, :user, :channel, :messages
 
     display_name "IRC Onetime Notifier"
 
@@ -11,6 +11,7 @@ class NotifierPublisher < Jenkins::Tasks::Publisher
     # is created from a configuration screen.
     def initialize(attrs = {})
       attrs.each { |k, v| instance_variable_set "@#{k}", v }
+      @messages = [@messages] if @messages.class == Hash
     end
 
     ##
@@ -32,6 +33,25 @@ class NotifierPublisher < Jenkins::Tasks::Publisher
       # actually perform the build step
       env = EnvChanger.new(build.native.getEnvironment())
       irc = OnetimeIRCNotifier.new(env.change(@server), env.change(@port).to_i)
-      irc.send_with_changename(env.change(@user), env.change(@channel), env.change(@message))
+      messages.each do |message|
+        next unless match_trigger?(build, message["trigger"])
+        irc.send_with_changename(env.change(@user), env.change(@channel), env.change(message["message"]))
+      end
+    end
+
+    private
+
+    def match_trigger?(build, trigger)
+      return true if trigger == "complete"
+
+      case build.native.getResult.to_s
+      when "SUCCESS"
+        return trigger == "stable" || trigger == "stable_or_unstable"
+      when "FAILURE"
+        return trigger == "failed" || trigger == "unstable_or_failed"
+      when "UNSTABLE"
+        return trigger == "unstable" || trigger == "unstable_or_failed"
+      end
+      return false
     end
 end
