@@ -13,22 +13,21 @@ class OnetimeIRCNotifier
     @port ||= port
   end
 
-  def send(name, channel, messages)
-    irc = IRCSocket.new(@server, @port)
-    irc.connect
-    raise IRCConnectError.new("can't connect #{@server}:#{@port}") unless irc.connected?
+  def connect(name, channel, &block)
+    @irc = IRCSocket.new(@server, @port)
+    @irc.connect
+    @channel = channel
+    raise IRCConnectError.new("can't connect #{@server}:#{@port}") unless @irc.connected?
 
-    irc.nick name
-    irc.user name, 0, "*", "OnetimeIRCNotifier"
+    @irc.nick name
+    @irc.user name, 0, "*", "OnetimeIRCNotifier"
 
-    while line = irc.read do
+    while line = @irc.read do
       case line.split[1]
       when '376'
-        irc.join channel
-        messages.each_line do |line|
-          irc.privmsg channel, line.chomp
-        end
-        irc.part channel
+        @irc.join @channel
+        block.call(self)
+        @irc.part @channel
         break
       when '433'
         raise IRCNickNameAlreadyUse.new(line)
@@ -36,12 +35,18 @@ class OnetimeIRCNotifier
         raise IRCError.new(line)
       end
     end
+
+  ensure
+    @irc = nil
+    @channel = nil
   end
 
-  def send_with_changename(name, channel, messages)
+  def connect_with_changename(name, channel, &block)
     change_name = name
     begin
-      send(change_name, channel, messages)
+      connect(change_name, channel) do |irc|
+        block.call(irc)
+      end
     rescue IRCNickNameAlreadyUse => e
       if change_name.size < 9
         change_name = "#{change_name}_"
@@ -49,6 +54,13 @@ class OnetimeIRCNotifier
       end
       raise e
     end
+  end
+
+  def send_messages(messages)
+    messages.each_line do |line|
+      @irc.privmsg @channel, line.chomp
+    end
+    
   end
 end
 

@@ -33,9 +33,11 @@ class NotifierPublisher < Jenkins::Tasks::Publisher
       # actually perform the build step
       env = EnvChanger.new(build.native.getEnvironment())
       irc = OnetimeIRCNotifier.new(env.change(@server), env.change(@port).to_i)
-      messages.each do |message|
-        next unless match_trigger?(build, message["trigger"])
-        irc.send_with_changename(env.change(@user), env.change(@channel), env.change(message["message"]))
+      irc.connect_with_changename(env.change(@user), env.change(@channel)) do |connector|
+        @messages.each do |message|
+          next unless match_trigger?(build, message["trigger"])
+          connector.send_messages(env.change(message["message"]))
+        end
       end
     end
 
