@@ -1,4 +1,7 @@
 <%
+  inst = instance rescue nil
+  inst = inst.getTarget if inst.respond_to?(:getTarget)
+
   f = taglib("/lib/form")
   f.block do
 %>
@@ -26,33 +29,33 @@
   f.entry :title => 'Channel',
           :field => :channel,
           :description => 'IRC Channel' do
-    f.textbox :clazz => 'required'
+            f.textbox :clazz => 'required'
   end
 
   f.entry :title => "Messages",
           :fiels => :messages do
     f.repeatable :field => "messages",
-      :minimum => 1 do
+                 :minimum => 1 do |x|
 %>
   <table width="100%">
 
     <% f.entry :title => "Trigger",
                :field => :trigger do %>
       <select name="trigger">
-        <% f.option :value => "stable", :selected => "true" do %>Stable<% end %>
-        <% f.option :value => "unstable" do %>Unstable<% end %>
-        <% f.option :value => "stable_or_unstable" do %>Stable or unstable but not failed<% end %>
-        <% f.option :value => "unstable_or_failed" do %>Unstable or failed but not stable<% end %>
-        <% f.option :value => "failed" do %>Failed<% end %>
-        <% f.option :value => "complete" do %>Complete<% end %>
+        <% f.option :value => "stable",   :selected => ((inst ? inst.class.message(inst, :key => 'trigger') : nil) == "stable").to_s do %>Stable<% end %>
+        <% f.option :value => "unstable", :selected => ((inst ? inst.class.message(inst, :key => 'trigger') : nil) == "unstable").to_s do %>Unstable<% end %>
+        <% f.option :value => "stable_or_unstable", :selected => ((inst ? inst.class.message(inst, :key => 'trigger') : nil) == "stable_or_unstable").to_s do %>Stable or unstable but not failed<% end %>
+        <% f.option :value => "unstable_or_failed", :selected => ((inst ? inst.class.message(inst, :key => 'trigger') : nil) == "unstable_or_failed").to_s do %>Unstable or failed but not stable<% end %>
+        <% f.option :value => "failed",   :selected => ((inst ? inst.class.message(inst, :key => 'trigger') : nil) == "failed").to_s do %>Failed<% end %>
+        <% f.option :value => "complete", :selected => ((inst ? inst.class.message(inst, :key => 'trigger') : nil) == "complete").to_s do %>Complete<% end %>
       </select>
     <% end %>
 <%
     f.entry :title => 'Message',
             :field => :message,
             :description => 'IRC Message' do
-      f.textarea :clazz => 'required'
-    end
+              f.textarea :clazz => 'required', :value => inst ? inst.class.message(inst, :with_next => true, :key => 'message') : nil
+            end
 
     f.entry do
       f.repeatableDeleteButton

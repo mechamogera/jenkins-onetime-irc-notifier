@@ -2,6 +2,16 @@ require_relative 'onetime-irc-notifier'
 require_relative 'env-changer'
 
 class NotifierPublisher < Jenkins::Tasks::Publisher
+    def self.message(instance, options = {})
+      return nil if instance.nil? || instance.messages.nil?
+
+      @index ||= 0
+      idx = @index
+      @index += 1 if options[:with_next]
+      @index = 0 if @index >= instance.messages.size
+
+      return instance.messages[idx] ? instance.messages[idx][options[:key]] : nil
+    end
 
     attr_reader :server, :port, :user, :channel, :messages
 
